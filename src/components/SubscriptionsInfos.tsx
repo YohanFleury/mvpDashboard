@@ -20,11 +20,10 @@ import users from "../api/users";
 
 interface SubscriptionsInfosProps {
   id: any;
+  subscriptions: any[];
 }
 
-const SubscriptionsInfos = ({ id }: SubscriptionsInfosProps) => {
-  const [loading, setLoading] = useState(true);
-  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+const SubscriptionsInfos = ({ id, subscriptions }: SubscriptionsInfosProps) => {
   const [transactions, setTransactions] = useState<any[]>([]);
 
   const getTransactionsApi = useApi(users.getUserTransactions);
@@ -36,6 +35,8 @@ const SubscriptionsInfos = ({ id }: SubscriptionsInfosProps) => {
   useEffect(() => {
     if (getTransactionsApi.success) {
       console.log("Transactions : ", getTransactionsApi.data);
+      const orderedTransaction = getTransactionsApi.data.reverse();
+      setTransactions(orderedTransaction);
     } else if (getTransactionsApi.error) {
       console.log(
         "Erreur transactions : ",
@@ -46,50 +47,6 @@ const SubscriptionsInfos = ({ id }: SubscriptionsInfosProps) => {
   }, [getTransactionsApi.success, getTransactionsApi.error]);
 
   // Données factices pour les abonnements
-  useEffect(() => {
-    setTimeout(() => {
-      setSubscriptions([
-        {
-          creatorUsername: "Dj Snake",
-          status: "active",
-          startDate: "2024-01-01",
-        },
-        {
-          creatorUsername: "Cedric Grolet",
-          status: "canceled",
-          startDate: "2023-07-15",
-        },
-        {
-          creatorUsername: "Dua Lipa",
-          status: "expired",
-          startDate: "2023-01-20",
-        },
-      ]);
-      setTransactions([
-        {
-          id: "12345",
-          type: "INITIAL_PURCHASE",
-          productId: "com.app.product1",
-          price: 9.99,
-          currency: "USD",
-          transactionId: "abcd1234",
-          purchaseDate: "2024-07-01T10:00:00Z",
-          platform: "Apple",
-        },
-        {
-          id: "67890",
-          type: "RENEWAL",
-          productId: "com.app.product2",
-          price: 19.99,
-          currency: "USD",
-          transactionId: "efgh5678",
-          purchaseDate: "2024-07-12T10:00:00Z",
-          platform: "Apple",
-        },
-      ]);
-      setLoading(false);
-    }, 1000); // Simuler un délai de chargement
-  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -111,16 +68,7 @@ const SubscriptionsInfos = ({ id }: SubscriptionsInfosProps) => {
       <Typography variant="h5" gutterBottom>
         Subscriptions
       </Typography>
-      {loading ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          height="50vh"
-        >
-          <CircularProgress />
-        </Box>
-      ) : (
+      {
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Paper elevation={3} sx={{ padding: "20px", borderRadius: "12px" }}>
@@ -136,7 +84,7 @@ const SubscriptionsInfos = ({ id }: SubscriptionsInfosProps) => {
                   <TableBody>
                     {subscriptions.map((subscription, index) => (
                       <TableRow key={index}>
-                        <TableCell>{subscription.creatorUsername}</TableCell>
+                        <TableCell>{subscription.username}</TableCell>
                         <TableCell>
                           <Box display="flex" alignItems="center">
                             <Box
@@ -176,7 +124,7 @@ const SubscriptionsInfos = ({ id }: SubscriptionsInfosProps) => {
                     <TableRow>
                       <TableCell>Transaction ID</TableCell>
                       <TableCell>Type</TableCell>
-                      <TableCell>Product ID</TableCell>
+                      <TableCell>Creator ID</TableCell>
                       <TableCell>Price</TableCell>
                       <TableCell>Currency</TableCell>
                       <TableCell>Purchase Date</TableCell>
@@ -184,19 +132,21 @@ const SubscriptionsInfos = ({ id }: SubscriptionsInfosProps) => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {transactions.map((transaction, index) => (
+                    {transactions.map((transaction: any, index: number) => (
                       <TableRow key={index}>
-                        <TableCell>{transaction.transactionId}</TableCell>
+                        <TableCell>123456</TableCell>
                         <TableCell>{transaction.type}</TableCell>
-                        <TableCell>{transaction.productId}</TableCell>
-                        <TableCell>{transaction.price}</TableCell>
+                        <TableCell>{transaction.creatorId}</TableCell>
+                        <TableCell>
+                          {transaction.priceInPurchasedCurrency}
+                        </TableCell>
                         <TableCell>{transaction.currency}</TableCell>
                         <TableCell>
                           {new Date(
-                            transaction.purchaseDate
+                            transaction.transactionDate
                           ).toLocaleDateString()}
                         </TableCell>
-                        <TableCell>{transaction.platform}</TableCell>
+                        <TableCell>{transaction.plateform}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -205,7 +155,7 @@ const SubscriptionsInfos = ({ id }: SubscriptionsInfosProps) => {
             </Paper>
           </Grid>
         </Grid>
-      )}
+      }
     </Box>
   );
 };

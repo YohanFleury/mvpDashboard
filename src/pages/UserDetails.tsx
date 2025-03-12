@@ -173,7 +173,10 @@ const UserDetails = () => {
               </Button>
             </Grid>
             <Grid item xs={12}>
-              <SubscriptionsInfos id={id} />
+              <SubscriptionsInfos
+                subscriptions={getSubscriptionsApi.data}
+                id={id}
+              />
             </Grid>
           </>
         ) : (

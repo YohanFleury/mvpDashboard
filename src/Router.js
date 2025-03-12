@@ -17,6 +17,7 @@ import PublicRoute from './components/PublicRoute';
 import { useAuth } from './contexts/AuthContext';
 import apiClient from './api/client';
 import RegistrationManagement from './pages/RegistrationManagement';
+import Payments from './pages/Payments';
 
 const AppRouter = () => {
   const { isLoggedIn } = useAuth();
@@ -45,6 +46,7 @@ const AppRouter = () => {
         <Route path="/support" element={<PrivateRoute element={<Support />} />} />
         <Route path="/ticket/:id" element={<PrivateRoute element={<TicketDetails />} />} />
         <Route path="/registration" element={<PrivateRoute element={<RegistrationManagement />} />} />
+        <Route path="/payments" element={<PrivateRoute element={<Payments />} />} />
       </Routes>
     </Router>
   );

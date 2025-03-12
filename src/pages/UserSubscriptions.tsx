@@ -33,6 +33,7 @@ const UserSubscriptions = () => {
   useEffect(() => {
     if (getTransactionsApi.success) {
       console.log("Transactions : ", getTransactionsApi.data);
+      //setTransactions()
     } else if (getTransactionsApi.error) {
       console.log(
         "Erreur transactions : ",
@@ -41,52 +42,6 @@ const UserSubscriptions = () => {
       );
     }
   }, [getTransactionsApi.success, getTransactionsApi.error]);
-
-  // Données factices pour les abonnements
-  useEffect(() => {
-    setTimeout(() => {
-      setSubscriptions([
-        {
-          creatorUsername: "Dj Snake",
-          status: "active",
-          startDate: "2024-01-01",
-        },
-        {
-          creatorUsername: "Cedric Grolet",
-          status: "canceled",
-          startDate: "2023-07-15",
-        },
-        {
-          creatorUsername: "Dua Lipa",
-          status: "expired",
-          startDate: "2023-01-20",
-        },
-      ]);
-      setTransactions([
-        {
-          id: "12345",
-          type: "INITIAL_PURCHASE",
-          productId: "com.app.product1",
-          price: 9.99,
-          currency: "USD",
-          transactionId: "abcd1234",
-          purchaseDate: "2024-07-01T10:00:00Z",
-          platform: "Apple",
-        },
-        {
-          id: "67890",
-          type: "RENEWAL",
-          productId: "com.app.product2",
-          price: 19.99,
-          currency: "USD",
-          transactionId: "efgh5678",
-          purchaseDate: "2024-07-12T10:00:00Z",
-          platform: "Apple",
-        },
-      ]);
-      setLoading(false);
-    }, 1000); // Simuler un délai de chargement
-  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -181,7 +136,7 @@ const UserSubscriptions = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {transactions.map((transaction, index) => (
+                    {transactions.reverse().map((transaction, index) => (
                       <TableRow key={index}>
                         <TableCell>{transaction.transactionId}</TableCell>
                         <TableCell>{transaction.type}</TableCell>

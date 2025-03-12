@@ -53,69 +53,11 @@ const Users = () => {
     getUserByEmail.request(searchTerm);
   };
 
-  const data = {
-    totalUsers: 5000,
-    totalCreators: 500,
-    totalFans: 4500,
-    newUsersThisMonth: 200,
-  };
-
-  const cardData = [
-    {
-      title: "Total Users",
-      value: data.totalUsers.toLocaleString(),
-      icon: <People />,
-      color: "#1976d2",
-    },
-    {
-      title: "Total Creators",
-      value: data.totalCreators.toLocaleString(),
-      icon: <Group />,
-      color: "#ff5722",
-    },
-    {
-      title: "Total Fans",
-      value: data.totalFans.toLocaleString(),
-      icon: <Person />,
-      color: "#1976d2",
-    },
-    {
-      title: "New Users (This Month)",
-      value: data.newUsersThisMonth.toLocaleString(),
-      icon: <Person />,
-      color: "#4caf50",
-    },
-  ];
-
   return (
     <Box
       sx={{ padding: "20px", backgroundColor: "#f5f5f5", minHeight: "100vh" }}
     >
       <Grid container spacing={3}>
-        {/* Summary Cards */}
-        {cardData.map((card, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
-            <Card
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                padding: "10px",
-                backgroundColor: "#ffffff",
-              }}
-            >
-              <Box sx={{ marginRight: "15px", color: card.color }}>
-                {card.icon}
-              </Box>
-              <CardContent>
-                <Typography variant="h6" color="textSecondary" gutterBottom>
-                  {card.title}
-                </Typography>
-                <Typography variant="h4">{card.value}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-
         {/* Search and Filters */}
         <Grid item xs={12} md={10}>
           <TextField
@@ -175,7 +117,7 @@ const Users = () => {
           </Grid>
         )}
 
-        {getUserByEmail.data && (
+        {getUserByEmail.data.id && (
           <Grid item xs={12} md={6}>
             <Paper
               elevation={3}

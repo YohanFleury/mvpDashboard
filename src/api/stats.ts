@@ -7,8 +7,12 @@ const getSubscriptionsStats = () => apiClient.get(`${endpoint}/global/abonnement
 
 const getExclusifContentStats = () => apiClient.get(`${endpoint}/global/contentEx`)
 
+const getRevenueStats = () => apiClient.get(`${endpoint}/global/revenus`)
+
+
 export default {
     getGlobalStats,
     getSubscriptionsStats,
-    getExclusifContentStats
+    getExclusifContentStats,
+    getRevenueStats
 }

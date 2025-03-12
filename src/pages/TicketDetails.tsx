@@ -7,12 +7,7 @@ import {
   Grid,
   Box,
   Paper,
-  TextField,
   Button,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
   CircularProgress,
   Avatar,
   IconButton,
@@ -25,46 +20,132 @@ import {
   DialogActions,
 } from "@mui/material";
 import { Save, Send, ExpandMore } from "@mui/icons-material";
+import useApi from "../hooks/useApi";
+import support from "../api/support";
+
+export type Ticket = {
+  content: string;
+  creationdDateTimes: string;
+  emailUser: string;
+  id: number;
+  priority: {
+    code: number;
+    libelle: string;
+  };
+  status: {
+    code: number;
+    libelle: string;
+  };
+  subject: string;
+};
 
 const TicketDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [ticket, setTicket] = useState<any>(null);
+  const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(true);
   const [response, setResponse] = useState("");
-  const [status, setStatus] = useState("");
-  const [priority, setPriority] = useState("");
   const [openModal, setOpenModal] = useState(false);
 
-  useEffect(() => {
-    setTimeout(() => {
-      const fetchedTicket = {
-        id: id,
-        email: "user1@example.com",
-        subject: "Login Issue",
-        content:
-          "I cannot log in to my account. " + "More content... ".repeat(20),
-        status: "new",
-        priority: "high",
-        created_at: "2024-07-01T10:00:00Z",
-      };
-      setTicket(fetchedTicket);
-      setStatus(fetchedTicket.status);
-      setPriority(fetchedTicket.priority);
-      setLoading(false);
-    }, 1000);
-  }, [id]);
+  // API
+  const getTicketDetailApi = useApi(support.getTicketDetail);
+  const updateTicketApi = useApi(support.updateTicket);
 
+  useEffect(() => {
+    getTicketDetailApi.request(id);
+  }, []);
+
+  useEffect(() => {
+    if (getTicketDetailApi.success) {
+      console.log("Détail du ticket : ", getTicketDetailApi.data);
+      setTicket(getTicketDetailApi.data);
+    } else if (getTicketDetailApi.error) {
+      console.log(
+        "Erreur get ticket : ",
+        getTicketDetailApi.problem,
+        getTicketDetailApi.status
+      );
+    }
+  }, [getTicketDetailApi.success, getTicketDetailApi.error]);
+
+  useEffect(() => {
+    if (updateTicketApi.success) {
+      console.log("Ticket updated !", updateTicketApi.data);
+    } else if (updateTicketApi.error) {
+      console.log(
+        "Error updated ticket ",
+        updateTicketApi.problem,
+        updateTicketApi.status
+      );
+    }
+  }, [updateTicketApi.success, updateTicketApi.error]);
+
+  // Mise à jour du status du ticket
+  const handleStatusUpdate = (code: number, libelle: string) => {
+    setTicket((prevTicket) => {
+      if (!prevTicket) return prevTicket;
+      return {
+        ...prevTicket,
+        status: {
+          code,
+          libelle,
+        },
+      };
+    });
+  };
+
+  // Mise à jour de la priority du ticket
+  const handlePriorityUpdate = (code: number, libelle: string) => {
+    setTicket((prevTicket) => {
+      if (!prevTicket) return prevTicket;
+      return {
+        ...prevTicket,
+        priority: {
+          code,
+          libelle,
+        },
+      };
+    });
+  };
+
+  // Lorsque l'utilisateur clique sur un status, on met à jour le ticket
   const handleStatusChange = (event: any, newStatus: string) => {
     if (newStatus !== null) {
-      setStatus(newStatus);
+      const statusMapping: {
+        [key: string]: { code: number; libelle: string };
+      } = {
+        new: { code: 1, libelle: "New" },
+        open: { code: 2, libelle: "Open" },
+        pending: { code: 3, libelle: "Pending" },
+        resolved: { code: 4, libelle: "Resolved" },
+        closed: { code: 5, libelle: "Closed" },
+      };
+      const newStatusObj = statusMapping[newStatus];
+      if (newStatusObj) {
+        handleStatusUpdate(newStatusObj.code, newStatusObj.libelle);
+      }
     }
   };
 
+  // Lorsque l'utilisateur clique sur une priority, on met à jour le ticket
   const handlePriorityChange = (event: any, newPriority: string) => {
     if (newPriority !== null) {
-      setPriority(newPriority);
+      const priorityMapping: {
+        [key: string]: { code: number; libelle: string };
+      } = {
+        low: { code: 1, libelle: "Low" },
+        medium: { code: 2, libelle: "Medium" },
+        high: { code: 3, libelle: "High" },
+      };
+      const newPriorityObj = priorityMapping[newPriority];
+      if (newPriorityObj) {
+        handlePriorityUpdate(newPriorityObj.code, newPriorityObj.libelle);
+      }
     }
+  };
+
+  const updateTicket = () => {
+    updateTicketApi.request(ticket);
   };
 
   const handleResponseChange = (event: any) => {
@@ -73,11 +154,6 @@ const TicketDetails = () => {
 
   const handleSubmitResponse = () => {
     console.log("Response:", response);
-  };
-
-  const handleUpdateTicket = () => {
-    console.log("Status:", status);
-    console.log("Priority:", priority);
   };
 
   const handleOpenModal = () => {
@@ -94,7 +170,7 @@ const TicketDetails = () => {
     <Box
       sx={{ padding: "20px", backgroundColor: "#f5f5f5", minHeight: "100vh" }}
     >
-      {loading ? (
+      {getTicketDetailApi.loading && (
         <Box
           display="flex"
           justifyContent="center"
@@ -103,20 +179,21 @@ const TicketDetails = () => {
         >
           <CircularProgress />
         </Box>
-      ) : (
+      )}
+      {ticket && !getTicketDetailApi.loading && (
         <Grid container spacing={3} justifyContent="center">
           <Grid item xs={12} md={8}>
             <Paper elevation={3} sx={{ padding: "20px", borderRadius: "12px" }}>
               <Box display="flex" alignItems="center" marginBottom="20px">
                 <Avatar sx={{ marginRight: "10px", bgcolor: "#1976d2" }}>
-                  {ticket.email.charAt(0).toUpperCase()}
+                  {ticket?.emailUser}
                 </Avatar>
                 <Typography variant="h4">Ticket Details</Typography>
               </Box>
               <Grid container spacing={2}>
                 {[
                   { label: "Ticket ID", value: ticket.id },
-                  { label: "Email", value: ticket.email },
+                  { label: "Email", value: ticket.emailUser },
                   { label: "Subject", value: ticket.subject },
                 ].map((detail, index) => (
                   <Grid item xs={12} sm={6} key={index}>
@@ -160,7 +237,7 @@ const TicketDetails = () => {
                 <Grid item xs={12} sm={6}>
                   <Typography variant="h6">Status</Typography>
                   <ToggleButtonGroup
-                    value={status}
+                    value={ticket.status.libelle.toLowerCase()}
                     exclusive
                     onChange={handleStatusChange}
                     fullWidth
@@ -170,12 +247,13 @@ const TicketDetails = () => {
                     <ToggleButton value="open">Open</ToggleButton>
                     <ToggleButton value="pending">Pending</ToggleButton>
                     <ToggleButton value="resolved">Resolved</ToggleButton>
+                    <ToggleButton value="closed">Closed</ToggleButton>
                   </ToggleButtonGroup>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="h6">Priority</Typography>
                   <ToggleButtonGroup
-                    value={priority}
+                    value={ticket.priority.libelle.toLowerCase()}
                     exclusive
                     onChange={handlePriorityChange}
                     fullWidth
@@ -188,15 +266,6 @@ const TicketDetails = () => {
                 </Grid>
               </Grid>
               <Box sx={{ marginTop: "20px" }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={6}
-                  label="Response"
-                  variant="outlined"
-                  value={response}
-                  onChange={handleResponseChange}
-                />
                 <Box display="flex" justifyContent="flex-end" marginTop="10px">
                   <Tooltip title="Submit Response">
                     <IconButton
@@ -208,7 +277,7 @@ const TicketDetails = () => {
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Update Ticket">
-                    <IconButton color="secondary" onClick={handleUpdateTicket}>
+                    <IconButton color="secondary" onClick={updateTicket}>
                       <Save />
                     </IconButton>
                   </Tooltip>

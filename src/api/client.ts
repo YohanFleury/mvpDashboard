@@ -2,7 +2,7 @@ import { create } from 'apisauce'
 
 
 const apiClient = create({
-   baseURL: 'http://apitest.sharingzon.com/',
+   baseURL: 'https://apitest.sharingzon.com/',
    timeout: 30000,
    
 })

@@ -29,8 +29,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     localStorage.setItem("authToken", token);
     localStorage.setItem("email", email);
     setIsLoggedIn(true);
-    /* apiClient.setHeader("Authorization", `Bearer ${token}`);
-    apiClient.setHeader("email", email); */
+    apiClient.setHeader("Authorization", `Bearer ${token}`);
+    apiClient.setHeader("email", email);
   };
 
   const logout = () => {

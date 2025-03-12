@@ -50,6 +50,9 @@ const NavBar = () => {
           <Button color="inherit" component={Link} to="/registration">
             Registration
           </Button>
+          <Button color="inherit" component={Link} to="/payments">
+            Payments
+          </Button>
         </div>
         <div>
           <IconButton

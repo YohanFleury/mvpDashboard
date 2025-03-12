@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, Typography, Grid, Box, Paper } from "@mui/material";
 import {
   PieChart,
@@ -26,17 +26,47 @@ const Stats = () => {
   const getGlobalStatsApi = useApi(stats.getGlobalStats);
   const getSubscriptionsStatsApi = useApi(stats.getSubscriptionsStats);
   const getExclusifContentStatsApi = useApi(stats.getExclusifContentStats);
+  const getRevenueStatsApi = useApi(stats.getRevenueStats);
+
+  // STATE
+  const [globalStats, setGlobalStats] = useState({
+    dateStats: "",
+    nbCreators: 0,
+    nbFans: 0,
+    newCreatorsThisMonth: 0,
+    newFansThisMonth: 0,
+  });
+
+  const [subscriptionsStats, setSubscriptionsStats] = useState({
+    aboActifs: 0,
+    expiredAboThisMonth: 0,
+    newAboThisMonth: 0,
+  });
+
+  const [contentExStats, setContentExStats] = useState({
+    nbSoldThisMonth: 0,
+    nbTotalSold: 0,
+  });
+
+  const [revenueStats, setRevenueStats] = useState({
+    revenuAboThisMonth: 0,
+    revenuContentExThisMonth: 0,
+    revenuTotalAbo: 0,
+    revenuTotalContentEx: 0,
+  });
 
   // EFFECTS
   useEffect(() => {
     getGlobalStatsApi.request();
     getSubscriptionsStatsApi.request();
     getExclusifContentStatsApi.request();
+    getRevenueStatsApi.request();
   }, []);
 
   useEffect(() => {
     if (getExclusifContentStatsApi.success) {
       console.log("Content ex : ", getExclusifContentStatsApi.data);
+      setContentExStats(getExclusifContentStatsApi.data);
     } else if (getExclusifContentStatsApi.error) {
       console.log(
         "Erreur get content ex : ",
@@ -47,8 +77,22 @@ const Stats = () => {
   }, [getExclusifContentStatsApi.success, getExclusifContentStatsApi.error]);
 
   useEffect(() => {
+    if (getRevenueStatsApi.success) {
+      console.log("Revenus stats : ", getRevenueStatsApi.data);
+      setRevenueStats(getRevenueStatsApi.data);
+    } else if (getRevenueStatsApi.error) {
+      console.log(
+        "Erreur get content ex : ",
+        getRevenueStatsApi.status,
+        getRevenueStatsApi.problem
+      );
+    }
+  }, [getRevenueStatsApi.success, getRevenueStatsApi.error]);
+
+  useEffect(() => {
     if (getGlobalStatsApi.success) {
       console.log("Stats globales : ", getGlobalStatsApi.data);
+      setGlobalStats(getGlobalStatsApi.data);
     } else if (getGlobalStatsApi.error) {
       console.log(
         "Erreur get global stats : ",
@@ -61,6 +105,7 @@ const Stats = () => {
   useEffect(() => {
     if (getSubscriptionsStatsApi.success) {
       console.log("Abonnements stats : ", getSubscriptionsStatsApi.data);
+      setSubscriptionsStats(getSubscriptionsStatsApi.data);
     } else if (getSubscriptionsStatsApi.error) {
       console.log(
         "Erreur get Abonnements stats: ",
@@ -95,94 +140,105 @@ const Stats = () => {
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
   const pieData = [
-    { name: "Subscription Revenue", value: data.subscriptionRevenue },
-    { name: "Content Revenue", value: data.contentRevenue },
+    { name: "Abonnements", value: revenueStats.revenuTotalAbo },
+    { name: "Contenus Exclusifs", value: revenueStats.revenuTotalContentEx },
   ];
 
   const cardData = [
     {
-      title: "Total Users",
-      value: data.totalUsers.toLocaleString(),
+      title: "Utilisateurs",
+      value: globalStats.nbCreators + globalStats.nbFans,
       icon: <People />,
       color: "#1976d2",
     },
     {
-      title: "New Users (This Month)",
-      value: data.newUsers.toLocaleString(),
+      title: "Nouveaux utilisateurs (ce mois)",
+      value: globalStats.newCreatorsThisMonth + globalStats.newFansThisMonth,
       icon: <Person />,
       color: "#1976d2",
     },
     {
-      title: "Total Creators",
-      value: data.totalCreators.toLocaleString(),
+      title: "Créateurs",
+      value: globalStats.nbCreators,
       icon: <Group />,
       color: "#ff5722",
     },
     {
-      title: "New Creators (This Month)",
-      value: data.newCreators.toLocaleString(),
+      title: "Nouveaux créateurs (ce mois)",
+      value: globalStats.newCreatorsThisMonth,
       icon: <Person />,
       color: "#ff5722",
     },
     {
-      title: "Monthly Revenue",
-      value: `${data.monthlyRevenue.toLocaleString()}`,
+      title: "Revenu Total",
+      value: (
+        revenueStats.revenuTotalAbo + revenueStats.revenuTotalContentEx
+      ).toFixed(2),
       icon: <AttachMoney />,
       color: "#4caf50",
     },
     {
-      title: "Total Revenue",
-      value: `${data.totalRevenue.toLocaleString()}`,
+      title: "Revenu Mensuel",
+      value: (
+        revenueStats.revenuAboThisMonth + revenueStats.revenuContentExThisMonth
+      ).toFixed(2),
+      icon: <AttachMoney />,
+      color: "#4caf50",
+    },
+
+    {
+      title: "Revenu Total",
+      value: revenueStats.revenuTotalAbo.toFixed(2),
       icon: <AttachMoney />,
       color: "#4caf50",
     },
     {
-      title: "Subscription Revenue",
-      value: `${data.subscriptionRevenue.toLocaleString()}`,
+      title: "Revenu Mensuel",
+      value: revenueStats.revenuAboThisMonth.toFixed(2),
       icon: <AttachMoney />,
       color: "#4caf50",
     },
     {
-      title: "Current Subscriptions",
-      value: data.totalSubscriptions.toLocaleString(),
+      title: "Actifs",
+      value: subscriptionsStats.aboActifs,
       icon: <PersonAdd />,
       color: "#1976d2",
     },
     {
-      title: "New Subscriptions",
-      value: data.newSubscriptions.toLocaleString(),
+      title: "Nouveaux abonnements (ce mois)",
+      value: subscriptionsStats.newAboThisMonth,
       icon: <TrendingUp />,
       color: "#1976d2",
     },
     {
-      title: "Cancellations",
-      value: data.cancellations.toLocaleString(),
+      title: "Annulés",
+      value: subscriptionsStats.expiredAboThisMonth,
       icon: <RemoveCircle />,
       color: "#d32f2f",
     },
     {
-      title: "Content Revenue",
-      value: `${data.contentRevenue.toLocaleString()}`,
+      title: "Revenu Total",
+      value: revenueStats.revenuTotalContentEx.toFixed(2),
       icon: <AttachMoney />,
       color: "#4caf50",
     },
     {
-      title: "Total Paid Contents",
-      value: data.totalPaidContent.toLocaleString(),
-      icon: <Money />,
-      color: "#ffa000",
-    },
-    {
-      title: "Monthly Paid Contents",
-      value: data.monthlyPaidContent.toLocaleString(),
-      icon: <Money />,
-      color: "#ffa000",
-    },
-    {
-      title: "Paid Content Monthly Revenue",
-      value: `${data.paidContentMonthlyRevenue.toLocaleString()}`,
+      title: "Revenu Mensuel",
+      value: revenueStats.revenuContentExThisMonth,
       icon: <AttachMoney />,
       color: "#4caf50",
+    },
+    {
+      title: "Vendus (Total)",
+      value: contentExStats.nbTotalSold.toFixed(0),
+      icon: <Money />,
+      color: "#ffa000",
+    },
+    {
+      title: "Vendus ce mois",
+      value: contentExStats.nbSoldThisMonth,
+      icon: <Money />,
+      color: "#ffa000",
     },
   ];
 
@@ -192,7 +248,7 @@ const Stats = () => {
     >
       {/* User Stats */}
       <Typography variant="h4" gutterBottom>
-        Users
+        General
       </Typography>
       <Grid container spacing={3}>
         {cardData.slice(0, 6).map((card, index) => (
@@ -221,10 +277,10 @@ const Stats = () => {
 
       {/* Subscription Stats */}
       <Typography variant="h4" gutterBottom sx={{ marginTop: "30px" }}>
-        Subscriptions
+        Abonnements
       </Typography>
       <Grid container spacing={3}>
-        {cardData.slice(6, 10).map((card, index) => (
+        {cardData.slice(6, 11).map((card, index) => (
           <Grid item xs={12} sm={6} md={4} key={index}>
             <Card
               sx={{
@@ -250,10 +306,10 @@ const Stats = () => {
 
       {/* Paid Content Stats */}
       <Typography variant="h4" gutterBottom sx={{ marginTop: "30px" }}>
-        Exclusifs contents
+        Contenus Exclusifs
       </Typography>
       <Grid container spacing={3}>
-        {cardData.slice(10, 14).map((card, index) => (
+        {cardData.slice(11, 15).map((card, index) => (
           <Grid item xs={12} sm={6} md={4} key={index}>
             <Card
               sx={{
@@ -281,7 +337,7 @@ const Stats = () => {
       <Grid item xs={12} sx={{ marginTop: "30px" }}>
         <Paper elevation={3} sx={{ padding: "20px", borderRadius: "12px" }}>
           <Typography variant="h6" gutterBottom>
-            Revenue Distribution
+            Répartition des revenus
           </Typography>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>

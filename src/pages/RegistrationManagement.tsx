@@ -47,7 +47,7 @@ const RegistrationManagement = () => {
                 >
                   <PersonAdd fontSize="large" sx={{ color: "#3f51b5" }} />
                   <Typography variant="h6">
-                    Ajouter un créateur et générer un code
+                    Ajouter un créateur et générer un code d'inscription
                   </Typography>
                 </Box>
                 <TextField
